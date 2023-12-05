@@ -1,7 +1,7 @@
 #pragma once
 
 #include <vector>
-#include "types.h"
+#include "range.h"
 
 namespace AoC
 {
@@ -44,9 +44,8 @@ namespace AoC
 
     struct ConversionRange
     {
-        u64 DestinationRangeStart;
-        u64 SourceRangeStart;
-        u64 RangeLength;
+        RangeU64 SourceRange;
+        u64 DestinationRangeStart{};
     };
 
     struct ConversionMap

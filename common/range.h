@@ -4,6 +4,7 @@
 
 namespace AoC
 {
+    template<typename T>
     class Range
     {
     public:
@@ -12,13 +13,13 @@ namespace AoC
         {
         }
 
-        Range(s32 min, s32 max)
+        Range(T min, T max)
         {
             Min = min;
             Max = max;
         }
 
-        bool IsInRange(s32 value) const
+        bool IsInRange(T value) const
         {
             return (Min <= value && value <= Max);
         }
@@ -33,12 +34,9 @@ namespace AoC
             return IsInRange(range.Min) || IsInRange(range.Max) || range.IsInRange(Min) || range.IsInRange(Max);
         }
 
-        s32 Min;
-        s32 Max;
+        T Min;
+        T Max;
     };
 
-    bool operator==(const Range& lhs, const Range& rhs)
-    {
-        return lhs.Min == rhs.Min && lhs.Max == rhs.Max;
-    }
+    using RangeU64 = Range<u64>;
 }
