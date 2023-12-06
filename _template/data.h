@@ -1,5 +1,7 @@
 #pragma once
 
+#include "types.h"
+
 namespace AoC
 {
     const char* s_testInputData
