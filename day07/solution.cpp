@@ -1,6 +1,9 @@
 ﻿#include "data.h"
 #include "aoc.h"
 
+#include <numeric>
+#include "indexedcontainerwrapper.h"
+
 namespace AoC
 {
     namespace Internal
@@ -102,17 +105,7 @@ namespace AoC
         bool CompareHands(const HandData& lhs, const HandData& rhs)
         {
             return ConvertHandToScore(lhs) < ConvertHandToScore(rhs);
-        }
-
-        u32 ComputeTotalWinnings(const std::vector<HandData>& hands)
-        {
-            u32 totalWinnings{};
-            for (u32 i = 0; i < hands.size(); ++i)
-            {
-                totalWinnings += hands[i].BidAmount * (i + 1);
-            }
-            return totalWinnings;
-        }
+        } 
 
         void ConvertJacksToJokers(std::vector<HandData>& hands)
         {
@@ -147,12 +140,16 @@ namespace AoC
     void ComputeOutput(const InputData& input, OutputData& output)
     {
         std::vector<HandData> hands{ input.Hands };
+        indexed_container_wrapper<std::vector<HandData>, HandData> indexedHands{ hands };
+        auto accumulateWinnings{ [](u32 total, std::pair<const HandData&, size_t> value)
+            { return total + value.first.BidAmount * (u32)(value.second + 1); } };
+
         std::sort(hands.begin(), hands.end(), Internal::CompareHands);
-        output.TotalWinnings = Internal::ComputeTotalWinnings(hands);
+        output.TotalWinnings = std::accumulate(indexedHands.begin(), indexedHands.end(), 0UL, accumulateWinnings);
 
         Internal::ConvertJacksToJokers(hands);
         std::sort(hands.begin(), hands.end(), Internal::CompareHands);
-        output.TotalWinningsJoker = Internal::ComputeTotalWinnings(hands);
+        output.TotalWinningsJoker = std::accumulate(indexedHands.begin(), indexedHands.end(), 0UL, accumulateWinnings);
     }
 
     bool ValidateTestOutput(const OutputData& output)
