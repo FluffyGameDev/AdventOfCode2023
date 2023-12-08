@@ -67,19 +67,16 @@ namespace AoC
         std::vector<u32> startNodeIds;
 
         u32 nodeMask{};
-        u32 startNodeId{};
-        u32 endNodeId{};
+        u32 startNodeId{ Internal::ConvertToNodeId("AAA") };
+        u32 endNodeId{ Internal::ConvertToNodeId("ZZZ") };
         if (context.PartNumber == 1)
         {
-            startNodeIds.push_back(Internal::ConvertToNodeId("AAA"));
-            endNodeId = Internal::ConvertToNodeId("ZZZ");
+            startNodeIds.push_back(startNodeId);
             nodeMask = 0xffffff;
         }
         else
         {
             nodeMask = 0xff;
-            startNodeId = Internal::ConvertToNodeId("A");
-            endNodeId = Internal::ConvertToNodeId("Z");
             for (const auto& [nodeId, node] : input.Nodes)
             {
                 if ((nodeId & nodeMask) == (startNodeId & nodeMask))
