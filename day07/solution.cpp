@@ -25,7 +25,7 @@ namespace AoC
                 case 'J': card = Card::Jack; break;
                 case 'Q': card = Card::Queen; break;
                 case 'K': card = Card::King; break;
-                case 'A': card = Card::As; break;
+                case 'A': card = Card::Ace; break;
             }
             return card;
         }

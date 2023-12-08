@@ -29,7 +29,7 @@ namespace AoC
         Jack,
         Queen,
         King,
-        As,
+        Ace,
 
         Count,
         Unknown
