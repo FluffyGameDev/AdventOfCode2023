@@ -37,7 +37,7 @@ namespace AoC
         }
     }
 
-    bool ReadInput(std::istream& inputStream, InputData& inputData, AoCStep step)
+    bool ReadInput(std::istream& inputStream, InputData& inputData, const AoCContext& context)
     {
         std::string line{};
         std::getline(inputStream, inputData.DirectionsBuffer);
@@ -62,23 +62,30 @@ namespace AoC
         return true;
     }
 
-    void ComputeOutput(const InputData& input, OutputData& output)
+    void ComputeOutput(const InputData& input, OutputData& output, const AoCContext& context)
     {
         std::vector<u32> startNodeIds;
 
-        // Part 1
-        //startNodeIds.push_back(Internal::ConvertToNodeId("AAA"));
-        //u32 endNodeId{ Internal::ConvertToNodeId("ZZZ") };
-        //u32 nodeMask{ 0xffffff };
-
-        u32 nodeMask{ 0xff };
-        u32 startNodeId{ Internal::ConvertToNodeId("A") };
-        u32 endNodeId{ Internal::ConvertToNodeId("Z") };
-        for (const auto& [nodeId, node] : input.Nodes)
+        u32 nodeMask{};
+        u32 startNodeId{};
+        u32 endNodeId{};
+        if (context.PartNumber == 1)
         {
-            if ((nodeId & nodeMask) == (startNodeId & nodeMask))
+            startNodeIds.push_back(Internal::ConvertToNodeId("AAA"));
+            endNodeId = Internal::ConvertToNodeId("ZZZ");
+            nodeMask = 0xffffff;
+        }
+        else
+        {
+            nodeMask = 0xff;
+            startNodeId = Internal::ConvertToNodeId("A");
+            endNodeId = Internal::ConvertToNodeId("Z");
+            for (const auto& [nodeId, node] : input.Nodes)
             {
-                startNodeIds.push_back(nodeId);
+                if ((nodeId & nodeMask) == (startNodeId & nodeMask))
+                {
+                    startNodeIds.push_back(nodeId);
+                }
             }
         }
 
@@ -97,7 +104,7 @@ namespace AoC
         }
     }
 
-    bool ValidateTestOutput(const OutputData& output)
+    bool ValidateTestOutput(const OutputData& output, const AoCContext& context)
     {
         bool didTestsPass{ true };
 
@@ -114,6 +121,5 @@ namespace AoC
 
 void main()
 {
-    //AoC::Run<AoC::InputData, AoC::OutputData>(AoC::s_testInputDataPart1);
-    AoC::Run<AoC::InputData, AoC::OutputData>(AoC::s_testInputDataPart2);
+    AoC::Run<AoC::InputData, AoC::OutputData>({ AoC::s_testInputDataPart1, AoC::s_testInputDataPart2 });
 }

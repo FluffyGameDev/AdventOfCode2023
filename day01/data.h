@@ -7,7 +7,15 @@
 
 namespace AoC
 {
-    const char* s_testInputData
+    const char* s_testInputDataPart1
+    {
+        "1abc2\n"
+        "pqr3stu8vwx\n"
+        "a1b2c3d4e5f\n"
+        "treb7uchet"
+    };
+
+    const char* s_testInputDataPart2
     {
         "two1nine\n"
         "eightwothree\n"

@@ -122,7 +122,7 @@ namespace AoC
         }
     }
 
-    bool ReadInput(std::istream& inputStream, InputData& inputData, AoCStep step)
+    bool ReadInput(std::istream& inputStream, InputData& inputData, const AoCContext& context)
     {
         std::string line{};
         std::string hand{};
@@ -137,7 +137,7 @@ namespace AoC
         return true;
     }
 
-    void ComputeOutput(const InputData& input, OutputData& output)
+    void ComputeOutput(const InputData& input, OutputData& output, const AoCContext& context)
     {
         std::vector<HandData> hands{ input.Hands };
         indexed_container_wrapper<std::vector<HandData>, HandData> indexedHands{ hands };
@@ -152,7 +152,7 @@ namespace AoC
         output.TotalWinningsJoker = std::accumulate(indexedHands.begin(), indexedHands.end(), 0UL, accumulateWinnings);
     }
 
-    bool ValidateTestOutput(const OutputData& output)
+    bool ValidateTestOutput(const OutputData& output, const AoCContext& context)
     {
         bool didTestsPass{ true };
 
@@ -171,5 +171,5 @@ namespace AoC
 
 void main()
 {
-    AoC::Run<AoC::InputData, AoC::OutputData>(AoC::s_testInputData);
+    AoC::Run<AoC::InputData, AoC::OutputData>({ AoC::s_testInputData });
 }

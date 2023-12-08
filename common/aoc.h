@@ -13,45 +13,65 @@ namespace AoC
         RealData
     };
 
-    template<class InputData, class OutputData>
-    void Run(const char* testInputData)
+    struct AoCContext
     {
-        std::istringstream testInputStream{ testInputData };
+        AoCStep Step;
+        u32 PartNumber;
+    };
 
-        InputData testInput{};
-        OutputData testOutput{};
-
-        AoC::ReadInput(testInputStream, testInput, AoCStep::Test);
-        AoC::ComputeOutput(testInput, testOutput);
-
-        if (AoC::ValidateTestOutput(testOutput))
+    template<class InputData, class OutputData>
+    void Run(std::initializer_list<const char*> testInputData)
+    {
+        u32 part{ 1 };
+        for (const char* testInputText : testInputData)
         {
-            static const char* inputFile{ "input.txt" };
-            std::ifstream inputStream{ inputFile };
+            fmt::print("Part {} Start:\n", part);
+            fmt::print("==============\n");
+            std::istringstream testInputStream{ testInputText };
 
-            InputData inputData{};
-            OutputData outputData{};
+            InputData testInput{};
+            OutputData testOutput{};
 
-            bool readSucceeded{ inputStream.is_open() };
-            if (readSucceeded)
+            AoCContext context{};
+            context.PartNumber = part;
+            context.Step = AoCStep::Test;
+            AoC::ReadInput(testInputStream, testInput, context);
+            AoC::ComputeOutput(testInput, testOutput, context);
+
+            if (AoC::ValidateTestOutput(testOutput, context))
             {
-                readSucceeded &= AoC::ReadInput(inputStream, inputData, AoCStep::RealData);
-                inputStream.close();
-            }
+                fmt::print("Test Succeeded.\n");
+                static const char* inputFile{ "input.txt" };
+                std::ifstream inputStream{ inputFile };
 
-            if (readSucceeded)
-            {
-                AoC::ComputeOutput(inputData, outputData);
-                AoC::PrintOutput(outputData);
+                InputData inputData{};
+                OutputData outputData{};
+
+                bool readSucceeded{ inputStream.is_open() };
+                if (readSucceeded)
+                {
+                    context.Step = AoCStep::RealData;
+                    readSucceeded &= AoC::ReadInput(inputStream, inputData, context);
+                    inputStream.close();
+                }
+
+                if (readSucceeded)
+                {
+                    AoC::ComputeOutput(inputData, outputData, context);
+                    AoC::PrintOutput(outputData);
+                }
+                else
+                {
+                    fmt::print("Failed to open input file.\n");
+                }
             }
             else
             {
-                fmt::print("Failed to open input file.\n");
+                fmt::print("Tests have failed.\n");
             }
-        }
-        else
-        {
-            fmt::print("Tests have failed.\n");
+
+            fmt::print("==============\n\n");
+            ++part;
         }
     }
 }

@@ -129,7 +129,7 @@ namespace AoC
         }
     }
 
-    bool ReadInput(std::istream& inputStream, InputData& inputData, AoCStep step)
+    bool ReadInput(std::istream& inputStream, InputData& inputData, const AoCContext& context)
     {
         std::string line{};
         while (std::getline(inputStream, line))
@@ -143,7 +143,7 @@ namespace AoC
         return true;
     }
 
-    void ComputeOutput(const InputData& input, OutputData& output)
+    void ComputeOutput(const InputData& input, OutputData& output, const AoCContext& context)
     {
         std::vector<Internal::PartNumber> partNumbers{};
         ExtractPartNumbers(input, partNumbers);
@@ -154,7 +154,7 @@ namespace AoC
         output.SumGearRatios = std::accumulate(gearRatios.begin(), gearRatios.end(), 0, Internal::AccumulateGearRatios);
     }
 
-    bool ValidateTestOutput(const OutputData& output)
+    bool ValidateTestOutput(const OutputData& output, const AoCContext& context)
     {
         bool didTestsPass{ true };
 
@@ -173,5 +173,5 @@ namespace AoC
 
 void main()
 {
-    AoC::Run<AoC::InputData, AoC::OutputData>(AoC::s_testInputData);
+    AoC::Run<AoC::InputData, AoC::OutputData>({ AoC::s_testInputData });
 }

@@ -33,7 +33,7 @@ namespace AoC
         }
     }
 
-    bool ReadInput(std::istream& inputStream, InputData& inputData, AoCStep step)
+    bool ReadInput(std::istream& inputStream, InputData& inputData, const AoCContext& context)
     {
         std::string line{};
         if (std::getline(inputStream, line))
@@ -71,7 +71,7 @@ namespace AoC
         return true;
     }
 
-    void ComputeOutput(const InputData& input, OutputData& output)
+    void ComputeOutput(const InputData& input, OutputData& output, const AoCContext& context)
     {
         output.ProductNumberWays = 1;
         u64 raceCount{ (u64)input.Distances.size() };
@@ -85,7 +85,7 @@ namespace AoC
         output.SingleRaceNumberWays = Internal::ComputeNumberPossibleVictories(realTime, realDistance);
     }
 
-    bool ValidateTestOutput(const OutputData& output)
+    bool ValidateTestOutput(const OutputData& output, const AoCContext& context)
     {
         bool didTestsPass{ true };
 
@@ -104,5 +104,5 @@ namespace AoC
 
 void main()
 {
-    AoC::Run<AoC::InputData, AoC::OutputData>(AoC::s_testInputData);
+    AoC::Run<AoC::InputData, AoC::OutputData>({ AoC::s_testInputData });
 }

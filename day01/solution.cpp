@@ -16,7 +16,7 @@ namespace AoC
         "nine"
     };
 
-    bool ReadInput(std::istream& inputStream, InputData& inputData, AoCStep step)
+    bool ReadInput(std::istream& inputStream, InputData& inputData, const AoCContext& context)
     {
         std::string line{};
         while (std::getline(inputStream, line))
@@ -26,9 +26,9 @@ namespace AoC
         return true;
     }
 
-    void ComputeOutput(const InputData& input, OutputData& output)
+    void ComputeOutput(const InputData& input, OutputData& output, const AoCContext& context)
     {
-        bool readTextDigits{ true };
+        bool readTextDigits{ context.PartNumber == 2 };
         output.SumFirstLastDigits = 0;
         for (const std::string& line : input.Lines)
         {
@@ -68,22 +68,29 @@ namespace AoC
         }
     }
 
-    bool ValidateTestOutput(const OutputData& output)
+    bool ValidateTestOutput(const OutputData& output, const AoCContext& context)
     {
         bool didTestsPass{ true };
 
-        didTestsPass &= output.SumFirstLastDigits == 281;
+        if (context.PartNumber == 1)
+        {
+            didTestsPass &= output.SumFirstLastDigits == 142;
+        }
+        else
+        {
+            didTestsPass &= output.SumFirstLastDigits == 281;
+        }
 
         return didTestsPass;
     }
 
     void PrintOutput(const OutputData& output)
     {
-        fmt::print("Sum: {}", output.SumFirstLastDigits);
+        fmt::print("Sum: {}\n", output.SumFirstLastDigits);
     }
 }
 
 void main()
 {
-    AoC::Run<AoC::InputData, AoC::OutputData>(AoC::s_testInputData);
+    AoC::Run<AoC::InputData, AoC::OutputData>({ AoC::s_testInputDataPart1, AoC::s_testInputDataPart2 });
 }
