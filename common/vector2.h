@@ -20,6 +20,12 @@ namespace AoC
             return DotProduct(diff, diff);
         }
 
+        static s32 ManhattanDistance(const Vector2& v1, const Vector2& v2)
+        {
+            Vector2 diff{ v1 - v2 };
+            return std::abs(diff.x) + std::abs(diff.y);
+        }
+
         static Vector2 Rotate90DegClockwise(const Vector2& v)
         {
             return { v.y, -v.x };
