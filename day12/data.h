@@ -29,6 +29,6 @@ namespace AoC
 
     struct OutputData
     {
-        u32 PossibleArrangementsCount{};
+        u64 PossibleArrangementsCount{};
     };
 }

@@ -7,66 +7,62 @@ namespace AoC
 {
     namespace Internal
     {
-        u32 CountNextBlockSize(std::string::const_iterator& rawLineIt, std::string::const_iterator endIt)
+        // Solution shamelessly stolen from https://pastebin.com/nUfatbwu
+        u64 Solve(size_t currentChar, size_t currentBlock, bool placed, std::vector<std::vector<std::vector<u64>>>& dp,
+            const std::string& rawLine, const std::vector<u32>& blocks)
         {
-            while (rawLineIt != endIt && *rawLineIt == '.')
+            size_t rawLineSize{ rawLine.size() };
+            size_t blocksCount{ blocks.size() };
+
+            if ((currentChar > rawLineSize + 1) || (currentChar > rawLineSize && !placed))
+                return dp[currentChar][currentBlock][placed] = 0;
+
+            if (dp[currentChar][currentBlock][placed] != -1)
+                return dp[currentChar][currentBlock][placed];
+
+            if (placed)
             {
-                ++rawLineIt;
+                for (size_t k = currentChar - blocks[currentBlock - 1] - 1; k < currentChar - 1; k++)
+                {
+                    if (rawLine[k] == '.')
+                    {
+                        return dp[currentChar][currentBlock][placed] = 0;
+                    }
+                }
+                if (currentChar != rawLineSize + 1)
+                {
+                    if (rawLine[currentChar - 1] == '#')
+                    {
+                        return dp[currentChar][currentBlock][placed] = 0;
+                    }
+                }
+            }
+            if (currentBlock == blocksCount)
+            {
+                bool foundNonDefective = true;
+                for (size_t k = currentChar; k < rawLineSize; k++)
+                {
+                    foundNonDefective &= (rawLine[k] != '#');
+                }
+                return dp[currentChar][currentBlock][placed] = foundNonDefective;
             }
 
-            u32 blockSize{};
-            while (rawLineIt != endIt && *rawLineIt == '#')
+            u64 arragnementCount = 0;
+            if (currentChar < rawLineSize)
             {
-                ++rawLineIt;
-                ++blockSize;
+                if (rawLine[currentChar] != '.')
+                {
+                    arragnementCount += Solve(currentChar + blocks[currentBlock] + 1, currentBlock + 1, true, dp, rawLine, blocks);
+                }
+                if (rawLine[currentChar] != '#')
+                {
+                    arragnementCount += Solve(currentChar + 1, currentBlock, false, dp, rawLine, blocks);
+                }
             }
-            return blockSize;
+            return dp[currentChar][currentBlock][placed] = arragnementCount;
         }
 
-        bool IsArrangementPossible(const std::vector<u32>& blocks, const std::string& rawLine)
-        {
-            auto blocksIt{ blocks.begin() };
-            auto blocksEndIt{ blocks.end() };
-            auto rawLineIt{ rawLine.begin() };
-            auto rawLineEndIt{ rawLine.end() };
-            while (rawLineIt != rawLineEndIt && blocksIt != blocksEndIt)
-            {
-                u32 blockSize{ CountNextBlockSize(rawLineIt, rawLineEndIt) };
-                if (blockSize != *blocksIt)
-                {
-                    return blockSize < *blocksIt && rawLineIt != rawLineEndIt && *rawLineIt == '?';
-                }
-                ++blocksIt;
-            }
-            return CountNextBlockSize(rawLineIt, rawLineEndIt) == 0 && blocksIt == blocksEndIt;
-        }
-
-        void TryPossibleArrangements(const std::vector<u32>& blocks, size_t currentIndex, std::string& rawLine, u32& arrangementsCount)
-        {
-            size_t nextUnknownIndex{ rawLine.find_first_of('?', currentIndex) };
-            if (nextUnknownIndex != std::string::npos)
-            {
-                rawLine[nextUnknownIndex] = '.';
-                if (IsArrangementPossible(blocks, rawLine))
-                {
-                    TryPossibleArrangements(blocks, nextUnknownIndex + 1, rawLine, arrangementsCount);
-                }
-
-                rawLine[nextUnknownIndex] = '#';
-                if (IsArrangementPossible(blocks, rawLine))
-                {
-                    TryPossibleArrangements(blocks, nextUnknownIndex + 1, rawLine, arrangementsCount);
-                }
-
-                rawLine[nextUnknownIndex] = '?';
-            }
-            else if(IsArrangementPossible(blocks, rawLine))
-            {
-                ++arrangementsCount;
-            }
-        }
-
-        u32 ComputeArrangementsCount(const LineData& line, u32 folds)
+        u64 ComputeArrangementsCount(const LineData& line, u32 folds)
         {
             std::string rawLine{ line.RawData };
             std::vector<u32> blocks{ line.BlockData };
@@ -76,12 +72,9 @@ namespace AoC
                 rawLine += line.RawData;
                 blocks.insert(blocks.end(), line.BlockData.begin(), line.BlockData.end());
             }
-            fmt::print("Testing Line: {}", rawLine);
 
-            u32 arrangementsCount{};
-            TryPossibleArrangements(blocks, 0, rawLine, arrangementsCount);
-            fmt::print(" -> {} arrangements\n", arrangementsCount);
-            return arrangementsCount;
+            std::vector<std::vector<std::vector<u64>>> dp(2 * rawLine.size() + 1, std::vector<std::vector<u64>>(blocks.size() + 1, std::vector<u64>(2, -1)));
+            return Solve(0, 0, false, dp, rawLine, blocks);
         }
     }
 
@@ -109,8 +102,8 @@ namespace AoC
     void ComputeOutput(const InputData& input, OutputData& output, const AoCContext& context)
     {
         u32 folds{ context.PartNumber == 1 ? 1U : 5U };
-        auto countPossibilities{ [folds](u32 total, const LineData& line) { return total + Internal::ComputeArrangementsCount(line, folds); } };
-        output.PossibleArrangementsCount = std::accumulate(input.Lines.begin(), input.Lines.end(), 0U, countPossibilities);
+        auto countPossibilities{ [folds](u64 total, const LineData& line) { return total + Internal::ComputeArrangementsCount(line, folds); } };
+        output.PossibleArrangementsCount = std::accumulate(input.Lines.begin(), input.Lines.end(), 0ULL, countPossibilities);
     }
 
     bool ValidateTestOutput(const OutputData& output, const AoCContext& context)
