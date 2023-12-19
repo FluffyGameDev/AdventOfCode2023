@@ -2,12 +2,19 @@
 #include "aoc.h"
 
 #include <numeric>
+#include <queue>
 #include <string_view>
+#include "range.h"
 
 namespace AoC
 {
     namespace Internal
     {
+        struct PartRange
+        {
+            RangeU64 RatingRanges[(size_t)PartRating::Count];
+        };
+
         void ParseRule(std::string_view text, Rule& rule)
         {
             size_t conditionPosition{};
@@ -127,6 +134,109 @@ namespace AoC
             }
             return sumAcceptedPartRatings;
         }
+
+        u64 ComputeDistinctCombinations(const PartRange& partRange)
+        {
+            u64 total{ 1 };
+            for (const RangeU64& range : partRange.RatingRanges)
+            {
+                total *= (range.Max - range.Min + 1);
+            }
+            return total;
+        }
+
+        u64 ComputeTotalDistinctAcceptedCombinations(const InputData& input)
+        {
+            u64 totalDistinctAcceptedCombinations{};
+            PartRange initialPartRange{};
+            std::fill(std::begin(initialPartRange.RatingRanges), std::end(initialPartRange.RatingRanges), RangeU64{ 1ULL, 4000ULL });
+            std::queue<std::pair<std::string, PartRange>> pendingRanges{};
+            pendingRanges.push({ "in", initialPartRange });
+
+            while (!pendingRanges.empty())
+            {
+                auto [workflowName, partRange] { pendingRanges.front() };
+                pendingRanges.pop();
+                if (workflowName == "A")
+                {
+                    totalDistinctAcceptedCombinations += ComputeDistinctCombinations(partRange);
+                    continue;
+                }
+                else if (workflowName == "R")
+                {
+                    continue;
+                }
+
+                const Workflow& workflow{ input.Workflows.at(workflowName) };
+                for (const Rule& rule : workflow.Rules)
+                {
+                    bool canStopRules{};
+                    switch (rule.RuleType)
+                    {
+                        case RuleType::AlwaysTrue:
+                        {
+                            pendingRanges.push({ rule.SuccessDestination, partRange });
+                            canStopRules = true;
+                            break;
+                        }
+                        case RuleType::Lower:
+                        {
+                            size_t ratingIndex{ (size_t)rule.AffectedPartRating };
+                            RangeU64& partRatingRange{ partRange.RatingRanges[ratingIndex] };
+                            if (partRatingRange.Min < rule.ComparisonValue)
+                            {
+                                if (partRatingRange.Max < rule.ComparisonValue)
+                                {
+                                    pendingRanges.push({ rule.SuccessDestination, partRange });
+                                    canStopRules = true;
+                                }
+                                else
+                                {
+                                    PartRange newPartRange{ partRange };
+                                    RangeU64& newPartRatingRange{ newPartRange.RatingRanges[ratingIndex] };
+
+                                    partRatingRange.Min = rule.ComparisonValue;
+                                    newPartRatingRange.Max = rule.ComparisonValue - 1;
+                                    pendingRanges.push({ rule.SuccessDestination, newPartRange });
+                                }
+                            }
+                            break;
+                        }
+                        case RuleType::Greater:
+                        {
+                            size_t ratingIndex{ (size_t)rule.AffectedPartRating };
+                            RangeU64& partRatingRange{ partRange.RatingRanges[ratingIndex] };
+                            if (partRatingRange.Max > rule.ComparisonValue)
+                            {
+
+                                if (partRatingRange.Min > rule.ComparisonValue)
+                                {
+                                    pendingRanges.push({ rule.SuccessDestination, partRange });
+                                    canStopRules = true;
+                                }
+                                else
+                                {
+                                    PartRange newPartRange{ partRange };
+                                    RangeU64& newPartRatingRange{ newPartRange.RatingRanges[ratingIndex] };
+
+                                    partRatingRange.Max = rule.ComparisonValue;
+                                    newPartRatingRange.Min = rule.ComparisonValue + 1;
+                                    pendingRanges.push({ rule.SuccessDestination, newPartRange });
+                                }
+                            }
+                            break;
+                        }
+                    }
+
+                    if (canStopRules)
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return totalDistinctAcceptedCombinations;
+        }
     }
 
     bool ReadInput(std::istream& inputStream, InputData& inputData, const AoCContext& context)
@@ -152,6 +262,7 @@ namespace AoC
     void ComputeOutput(const InputData& input, OutputData& output, const AoCContext& context)
     {
         output.SumAcceptedPartRatings += Internal::ComputeTotalAcceptedPartRatings(input);
+        output.TotalDistinctAcceptedCombinations += Internal::ComputeTotalDistinctAcceptedCombinations(input);
     }
 
     bool ValidateTestOutput(const OutputData& output, const AoCContext& context)
